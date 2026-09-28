@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f5f8ff;
+  --foreground: #07111f;
+
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #2563eb;
+  --color-brand-600: #0b49d1;
+  --color-brand-700: #073aa8;
+  --color-brand-800: #082f87;
+  --color-brand-900: #0b286d;
+  --color-brand-950: #051a45;
+
+  --color-ink-50: #f8fafc;
+  --color-ink-100: #eef2f7;
+  --color-ink-200: #d9e1ed;
+  --color-ink-300: #b8c5d6;
+  --color-ink-400: #8290a3;
+  --color-ink-500: #5f6f85;
+  --color-ink-600: #445166;
+  --color-ink-700: #2f3a4c;
+  --color-ink-800: #172033;
+  --color-ink-900: #0b1220;
+  --color-ink-950: #050914;
+
+  --shadow-soft: 0 18px 60px -36px rgba(5, 26, 69, 0.45);
+  --shadow-card: 0 1px 2px rgba(5, 16, 35, 0.05), 0 18px 42px -30px rgba(5, 26, 69, 0.35);
+  --shadow-nav: 0 18px 60px -32px rgba(5, 16, 35, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono-jb);
+
+  --color-brand-50: var(--color-brand-50);
+  --color-brand-100: var(--color-brand-100);
+  --color-brand-200: var(--color-brand-200);
+  --color-brand-300: var(--color-brand-300);
+  --color-brand-400: var(--color-brand-400);
+  --color-brand-500: var(--color-brand-500);
+  --color-brand-600: var(--color-brand-600);
+  --color-brand-700: var(--color-brand-700);
+  --color-brand-800: var(--color-brand-800);
+  --color-brand-900: var(--color-brand-900);
+  --color-brand-950: var(--color-brand-950);
+
+  --color-ink-50: var(--color-ink-50);
+  --color-ink-100: var(--color-ink-100);
+  --color-ink-200: var(--color-ink-200);
+  --color-ink-300: var(--color-ink-300);
+  --color-ink-400: var(--color-ink-400);
+  --color-ink-500: var(--color-ink-500);
+  --color-ink-600: var(--color-ink-600);
+  --color-ink-700: var(--color-ink-700);
+  --color-ink-800: var(--color-ink-800);
+  --color-ink-900: var(--color-ink-900);
+  --color-ink-950: var(--color-ink-950);
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-card: var(--shadow-card);
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 32rem),
+    linear-gradient(180deg, #f8fbff 0%, var(--background) 42%, #ffffff 100%);
+  color: var(--foreground);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-300) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-ink-300);
+  border-radius: 999px;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.18);
+}
+
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.medora-glass {
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-nav);
+  backdrop-filter: blur(22px);
+}
