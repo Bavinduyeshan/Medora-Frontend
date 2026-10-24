@@ -30,7 +30,7 @@ export default function PatientRecordsPage() {
         description="Every diagnosis recorded across the Medora network, in one timeline."
       />
 
-      <div className="relative max-w-sm">
+      <div className="relative max-w-md">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
         <Input placeholder="Search by diagnosis, doctor, facility…" className="pl-9" value={query} onChange={(e) => setQuery(e.target.value)} />
       </div>
@@ -50,11 +50,11 @@ export default function PatientRecordsPage() {
           <Link
             key={r.id}
             href={`/patient/records/${r.id}`}
-            className="flex flex-col gap-3 rounded-2xl border border-ink-100 bg-white p-5 shadow-[var(--shadow-card)] transition-colors hover:bg-ink-50 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 rounded-2xl border border-brand-100/70 bg-white p-5 shadow-[var(--shadow-card)] transition-colors hover:bg-ink-50 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="min-w-0 space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-sm font-bold text-ink-900">{r.diagnosis}</h3>
+                <h3 className="text-sm font-black text-ink-950">{r.diagnosis}</h3>
                 <Badge tone={r.status === 'FINAL' ? 'success' : r.status === 'AMENDED' ? 'warning' : 'neutral'}>{r.status}</Badge>
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-500">

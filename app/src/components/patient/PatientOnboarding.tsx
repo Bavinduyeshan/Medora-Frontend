@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { HeartPulse } from 'lucide-react';
+import { HeartPulse, Phone, ShieldCheck, UserRound, type LucideIcon } from 'lucide-react';
 import { useCreatePatientProfile } from '@/hooks/usePatientData';
 import { Button } from '@/components/ui/Button';
 import { Field, Input, Select, Textarea } from '@/components/ui/Field';
@@ -54,30 +54,41 @@ export function PatientOnboarding() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl py-8">
-      <div className="mb-6 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50">
-          <HeartPulse className="h-6 w-6 text-brand-600" />
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
+      <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+        <div className="overflow-hidden rounded-3xl bg-[linear-gradient(150deg,#0b5fff_0%,#0ea5e9_52%,#0f172a_100%)] p-7 text-white shadow-2xl shadow-brand-950/15">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/16 backdrop-blur">
+            <HeartPulse className="h-7 w-7" />
+          </div>
+          <h1 className="mt-8 text-3xl font-black leading-tight tracking-normal">Complete your health profile</h1>
+          <p className="mt-4 text-sm leading-7 text-white/80">
+            Add the details care teams need to identify you, contact you, and understand important health context.
+          </p>
+          <div className="mt-8 space-y-3">
+            {[
+              ['Identity', 'Name, birthday, national ID'],
+              ['Contacts', 'Phone and emergency contact'],
+              ['Health notes', 'Allergies and conditions'],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-2xl border border-white/12 bg-white/12 p-4 backdrop-blur">
+                <p className="text-xs font-bold text-white/60">{label}</p>
+                <p className="mt-1 text-sm font-black text-white">{value}</p>
+              </div>
+            ))}
+          </div>
         </div>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight text-ink-900">Complete your health profile</h1>
-        <p className="mt-1 text-sm text-ink-500">
-          This creates your patient record and issues your identity QR code.
-        </p>
-      </div>
 
-      <Card>
-        <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+        <Card className="border-brand-100/80">
+          <CardContent className="p-5 sm:p-7">
+          <form onSubmit={onSubmit} className="space-y-6">
+            <SectionTitle icon={UserRound} title="Personal details" />
+            <div className="grid gap-4 sm:grid-cols-2">
               <Field label="First name" required>
                 <Input required value={form.firstName} onChange={(e) => set('firstName', e.target.value)} />
               </Field>
               <Field label="Last name" required>
                 <Input required value={form.lastName} onChange={(e) => set('lastName', e.target.value)} />
               </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
               <Field label="Date of birth" required>
                 <Input type="date" required value={form.dateOfBirth} onChange={(e) => set('dateOfBirth', e.target.value)} />
               </Field>
@@ -89,15 +100,10 @@ export function PatientOnboarding() {
                   <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
                 </Select>
               </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
               <Field label="Blood group" required>
                 <Select value={form.bloodGroup} onChange={(e) => set('bloodGroup', e.target.value as BloodGroup)}>
                   {BLOOD_GROUPS.map((b) => (
-                    <option key={b} value={b}>
-                      {b.replace('_', ' ')}
-                    </option>
+                    <option key={b} value={b}>{b.replace('_', ' ')}</option>
                   ))}
                 </Select>
               </Field>
@@ -106,16 +112,14 @@ export function PatientOnboarding() {
               </Field>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <SectionTitle icon={Phone} title="Contact details" />
+            <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Email" required>
                 <Input type="email" required value={form.email} onChange={(e) => set('email', e.target.value)} />
               </Field>
               <Field label="Phone" required>
                 <Input required value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+94771234567" />
               </Field>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
               <Field label="Emergency contact name" required>
                 <Input required value={form.emergencyContactName} onChange={(e) => set('emergencyContactName', e.target.value)} />
               </Field>
@@ -124,11 +128,11 @@ export function PatientOnboarding() {
               </Field>
             </div>
 
+            <SectionTitle icon={ShieldCheck} title="Address and health notes" />
             <Field label="Address" required>
               <Input required value={form.address} onChange={(e) => set('address', e.target.value)} />
             </Field>
-
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <Field label="City" required>
                 <Input required value={form.city} onChange={(e) => set('city', e.target.value)} />
               </Field>
@@ -136,23 +140,35 @@ export function PatientOnboarding() {
                 <Input required value={form.province} onChange={(e) => set('province', e.target.value)} />
               </Field>
             </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Known allergies" hint="Optional">
+                <Textarea value={form.allergies} onChange={(e) => set('allergies', e.target.value)} placeholder="Penicillin, Peanuts" />
+              </Field>
+              <Field label="Chronic conditions" hint="Optional">
+                <Textarea value={form.chronicConditions} onChange={(e) => set('chronicConditions', e.target.value)} placeholder="Asthma, Type 2 Diabetes" />
+              </Field>
+            </div>
 
-            <Field label="Known allergies" hint="Comma-separated, optional">
-              <Textarea value={form.allergies} onChange={(e) => set('allergies', e.target.value)} placeholder="Penicillin, Peanuts" />
-            </Field>
+            {error && <p className="rounded-2xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">{error}</p>}
 
-            <Field label="Chronic conditions" hint="Comma-separated, optional">
-              <Textarea value={form.chronicConditions} onChange={(e) => set('chronicConditions', e.target.value)} placeholder="Asthma, Type 2 Diabetes" />
-            </Field>
-
-            {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600">{error}</p>}
-
-            <Button type="submit" className="w-full" loading={createProfile.isPending}>
+            <Button type="submit" size="lg" className="w-full" loading={createProfile.isPending}>
               Save and continue
             </Button>
           </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function SectionTitle({ icon: Icon, title }: { icon: LucideIcon; title: string }) {
+  return (
+    <div className="flex items-center gap-3 border-b border-ink-100 pb-3">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+        <Icon className="h-4 w-4" />
+      </div>
+      <h2 className="text-sm font-black uppercase tracking-wide text-ink-900">{title}</h2>
     </div>
   );
 }

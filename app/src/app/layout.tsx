@@ -18,7 +18,7 @@ const jbMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Medora - Digital Health Platform',
   description:
-    'A unified healthcare network for Sri Lanka: QR-based patient identity, portable medical records, doctor-hospital affiliations, and full clinical audit trails.',
+    'A unified healthcare network for Sri Lanka with patient identity, portable medical records, doctor-hospital teams, and clear activity history.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

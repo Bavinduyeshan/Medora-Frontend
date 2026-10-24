@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ScrollText, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ScrollText, ChevronLeft, ChevronRight, Search, Clock3 } from 'lucide-react';
 import { useAuditLogs } from '@/hooks/useAdminData';
 import { PageHeader, EmptyState, Spinner, ErrorState } from '@/components/ui/Feedback';
 import { Input } from '@/components/ui/Field';
@@ -17,12 +17,12 @@ export default function AdminAuditPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Compliance" title="Audit Log" description="Every clinical action and data access event, platform-wide." />
+      <PageHeader eyebrow="Activity" title="Activity History" description="A clear timeline of important account, care, and facility actions." />
 
-      <div className="relative max-w-sm">
+      <div className="relative max-w-md">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
         <Input
-          placeholder="Filter by action e.g. RECORD_CREATED…"
+          placeholder="Search activity by name or action"
           className="pl-9"
           value={action}
           onChange={(e) => {
@@ -32,37 +32,36 @@ export default function AdminAuditPage() {
         />
       </div>
 
-      {isLoading && (
-        <div className="flex justify-center py-16">
-          <Spinner />
-        </div>
-      )}
+      {isLoading && <div className="flex justify-center py-16"><Spinner /></div>}
       {error && <ErrorState message={(error as ApiError).message} onRetry={() => refetch()} />}
-      {!isLoading && !error && (!logs || logs.content.length === 0) && <EmptyState icon={ScrollText} title="No audit entries found" />}
+      {!isLoading && !error && (!logs || logs.content.length === 0) && <EmptyState icon={ScrollText} title="No activity found" />}
 
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         {logs?.content.map((log) => (
-          <div key={log.id} className="rounded-2xl border border-ink-100 bg-white p-4 shadow-[var(--shadow-card)]">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Badge tone="info">{log.action}</Badge>
-                <span className="text-[11px] font-semibold text-ink-400">{roleTag(log.actorRole)}</span>
+          <div key={log.id} className="rounded-2xl border border-brand-100/70 bg-white p-4 shadow-[var(--shadow-card)]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+                  <ScrollText className="h-4 w-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-black text-ink-950">{prettyAction(log.action)}</p>
+                  <p className="mt-1 text-xs font-semibold text-ink-500">{log.description}</p>
+                </div>
               </div>
-              <span className="text-[11px] text-ink-400">{formatDateTime(log.createdAt)}</span>
-            </div>
-            <p className="mt-2 text-xs text-ink-600">{log.description}</p>
-            <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-ink-400">
-              {log.targetType && <span>Target: {log.targetType} {log.targetId?.slice(0, 8)}</span>}
-              {log.ipAddress && <span>IP: {log.ipAddress}</span>}
+              <div className="flex items-center gap-2">
+                <Badge tone="info">{roleTag(log.actorRole)}</Badge>
+                <span className="flex items-center gap-1 text-[11px] font-semibold text-ink-400"><Clock3 className="h-3.5 w-3.5" /> {formatDateTime(log.createdAt)}</span>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
       {logs && logs.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-ink-400">
-            Page {logs.number + 1} of {logs.totalPages} · {logs.totalElements} entries
+        <div className="flex items-center justify-between rounded-2xl border border-ink-100 bg-white p-3 shadow-[var(--shadow-card)]">
+          <p className="text-xs font-semibold text-ink-500">
+            Page {logs.number + 1} of {logs.totalPages} - {logs.totalElements} entries
           </p>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" disabled={logs.first} onClick={() => setPage((p) => Math.max(0, p - 1))} icon={<ChevronLeft className="h-3.5 w-3.5" />}>
@@ -80,4 +79,8 @@ export default function AdminAuditPage() {
 
 function roleTag(role: string) {
   return role.replace('_', ' ');
+}
+
+function prettyAction(action: string) {
+  return action.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }

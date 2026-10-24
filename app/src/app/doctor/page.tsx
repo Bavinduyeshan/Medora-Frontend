@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { QrCode, Building2, CalendarDays, Users, ArrowRight } from 'lucide-react';
+import { ArrowRight, BadgeCheck, Building2, CalendarDays, Clock3, QrCode, ShieldCheck, Stethoscope, Users } from 'lucide-react';
 import { useCurrentDoctor, useDoctorAffiliations, useDoctorAppointments } from '@/hooks/useDoctorData';
 import { useActiveWorkspace } from '@/hooks/useActiveWorkspace';
 import { CheckInPanel, AffiliationStatusNote } from '@/components/doctor/CheckInPanel';
@@ -22,17 +23,18 @@ export default function DoctorDashboardPage() {
   const [scanOpen, setScanOpen] = useState(false);
 
   const activeCount = affiliations?.filter((a) => a.status === 'ACTIVE').length ?? 0;
+  const pendingCount = affiliations?.filter((a) => a.status === 'PENDING').length ?? 0;
   const upcoming = appointments
     ?.filter((a) => a.status === 'SCHEDULED' || a.status === 'RESCHEDULED')
     .sort((a, b) => new Date(a.appointmentStart).getTime() - new Date(b.appointmentStart).getTime())
     .slice(0, 5);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         eyebrow="Doctor Portal"
-        title={`Dr. ${doctor ? fullName(doctor.firstName, doctor.lastName) : ''}`}
-        description={doctor ? `${doctor.specialization} · ${doctor.experienceYears} years of experience · SLMC ${doctor.slmcNumber}` : ''}
+        title={`Dr. ${doctor ? fullName(doctor.firstName, doctor.lastName) : 'Clinical Workspace'}`}
+        description={doctor ? `${doctor.specialization} - ${doctor.experienceYears} years of experience - Reg. ${doctor.slmcNumber}` : 'Review patients, access shared profiles, and work inside approved facility teams.'}
         actions={
           <Button icon={<QrCode className="h-4 w-4" />} onClick={() => setScanOpen(true)}>
             Scan Patient QR
@@ -40,69 +42,99 @@ export default function DoctorDashboardPage() {
         }
       />
 
-      {affLoading ? (
-        <div className="flex justify-center py-6">
-          <Spinner />
-        </div>
-      ) : (
-        <CheckInPanel affiliations={affiliations ?? []} />
-      )}
-      <AffiliationStatusNote />
-
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <StatCard icon={Building2} label="Active Affiliations" value={activeCount} tone="brand" />
-        <StatCard icon={CalendarDays} label="Upcoming Appointments" value={upcoming?.length ?? '—'} tone="sky" />
-        <StatCard icon={Users} label="Total Affiliations" value={affiliations?.length ?? '—'} tone="ink" />
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon={Building2} label="Active Affiliations" value={activeCount} hint="approved facilities" tone="brand" />
+        <StatCard icon={CalendarDays} label="Upcoming Visits" value={upcoming?.length ?? '-'} hint="scheduled or rescheduled" tone="sky" />
+        <StatCard icon={Users} label="Total Affiliations" value={affiliations?.length ?? '-'} hint="all facility links" tone="ink" />
+        <StatCard icon={Clock3} label="Pending Reviews" value={pendingCount} hint="credential checks" tone="amber" />
       </div>
 
-      <Card>
-        <div className="flex items-center justify-between p-5 sm:p-6 pb-0">
-          <h3 className="text-base font-bold text-ink-900">Upcoming appointments</h3>
+      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <div className="space-y-6">
+          {affLoading ? <div className="flex justify-center py-10"><Spinner /></div> : <CheckInPanel affiliations={affiliations ?? []} />}
+          <AffiliationStatusNote />
         </div>
-        <CardContent>
-          {apptLoading && (
-            <div className="flex justify-center py-10">
-              <Spinner />
-            </div>
-          )}
-          {!apptLoading && (!upcoming || upcoming.length === 0) && (
-            <EmptyState icon={CalendarDays} title="No upcoming appointments" description="Appointments booked with you will appear here." />
-          )}
-          <div className="space-y-2.5">
-            {upcoming?.map((a) => (
-              <div key={a.id} className="flex items-center justify-between rounded-xl border border-ink-100 p-3.5">
-                <div>
-                  <p className="text-xs font-bold text-ink-800">{a.tenantName || 'Facility'}</p>
-                  <p className="text-[11px] text-ink-500">{formatDateTime(a.appointmentStart)}</p>
-                </div>
-                <Badge tone="brand">{a.status}</Badge>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
-      <Card>
-        <div className="flex items-center justify-between p-5 sm:p-6 pb-0">
-          <h3 className="text-base font-bold text-ink-900">Your affiliations</h3>
-          <a href="/doctor/affiliations" className="flex items-center gap-1 text-xs font-semibold text-brand-600 hover:text-brand-700">
-            Manage <ArrowRight className="h-3.5 w-3.5" />
-          </a>
-        </div>
-        <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {affiliations?.map((a) => (
-              <div key={a.id} className="flex items-center justify-between rounded-xl border border-ink-100 p-3.5">
-                <div>
-                  <p className="text-xs font-bold text-ink-800">{a.tenantName || a.tenantId}</p>
-                  <p className="text-[11px] text-ink-500">{a.roleAtTenant}</p>
+        <Card>
+          <div className="flex items-center justify-between border-b border-ink-100 px-6 py-5">
+            <div>
+              <h3 className="text-lg font-black text-ink-950">Upcoming Appointments</h3>
+              <p className="mt-1 text-sm text-ink-500">Your next patient visits across active facilities.</p>
+            </div>
+            <Link href="/doctor/appointments" className="flex items-center gap-1 text-sm font-black text-brand-600 hover:text-brand-700">
+              View all <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <CardContent>
+            {apptLoading && <div className="flex justify-center py-10"><Spinner /></div>}
+            {!apptLoading && (!upcoming || upcoming.length === 0) && (
+              <EmptyState icon={CalendarDays} title="No upcoming appointments" description="Appointments booked with you will appear here." />
+            )}
+            <div className="space-y-3">
+              {upcoming?.map((a) => (
+                <div key={a.id} className="flex items-center justify-between rounded-2xl border border-ink-100 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+                      <Stethoscope className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-ink-950">{a.tenantName || 'Facility'}</p>
+                      <p className="mt-1 text-xs font-semibold text-ink-500">{formatDateTime(a.appointmentStart)}</p>
+                    </div>
+                  </div>
+                  <Badge tone="brand">{a.status}</Badge>
                 </div>
-                <Badge tone={a.status === 'ACTIVE' ? 'success' : a.status === 'PENDING' ? 'warning' : 'neutral'}>{a.status}</Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <Card>
+          <div className="flex items-center justify-between border-b border-ink-100 px-6 py-5">
+            <div>
+              <h3 className="text-lg font-black text-ink-950">Your Affiliations</h3>
+              <p className="mt-1 text-sm text-ink-500">Facility relationships define where you can review and write clinical data.</p>
+            </div>
+            <Link href="/doctor/affiliations" className="flex items-center gap-1 text-sm font-black text-brand-600 hover:text-brand-700">
+              Manage <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {affiliations?.map((a) => (
+                <div key={a.id} className="rounded-2xl border border-ink-100 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-black text-ink-950">{a.tenantName || a.tenantId}</p>
+                      <p className="mt-1 text-xs font-semibold text-ink-500">{a.roleAtTenant}</p>
+                    </div>
+                    <Badge tone={a.status === 'ACTIVE' ? 'success' : a.status === 'PENDING' ? 'warning' : 'neutral'}>{a.status}</Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="rounded-[1.35rem] bg-ink-950 p-6 text-white shadow-2xl shadow-ink-950/15">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-cyan-200">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+          <h3 className="mt-6 text-xl font-black">Clinical Access Guard</h3>
+          <p className="mt-3 text-sm leading-7 text-white/70">
+            Patient records unlock only through a valid QR scan, active facility context, and an approved doctor affiliation.
+          </p>
+          <div className="mt-7 space-y-3">
+            {['Patient identity confirmed', 'Facility selected', 'Activity saved'].map((item) => (
+              <div key={item} className="flex items-center gap-3 rounded-2xl bg-white/8 p-3 text-sm font-bold text-white/82">
+                <BadgeCheck className="h-4 w-4 text-cyan-200" /> {item}
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <ScanQrModal
         isOpen={scanOpen}

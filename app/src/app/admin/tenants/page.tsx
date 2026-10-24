@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { Building2, CheckCircle2, XCircle, MapPin, Phone, Mail } from 'lucide-react';
+import { Building2, CheckCircle2, XCircle, MapPin, Phone, Mail, FileText } from 'lucide-react';
 import { useApproveTenant, usePendingTenants, useRejectTenant } from '@/hooks/useAdminData';
 import { PageHeader, EmptyState, Spinner, ErrorState } from '@/components/ui/Feedback';
 import { Badge } from '@/components/ui/Badge';
@@ -23,21 +23,21 @@ function RejectModal({ tenant, onClose }: { tenant: TenantDto | null; onClose: (
     e.preventDefault();
     try {
       await rejectTenant.mutateAsync({ id: tenant.id, reason });
-      toast.success(`${tenant.name} was rejected.`);
+      toast.success(`${tenant.name} was sent back for updates.`);
       onClose();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Could not reject facility.');
+      toast.error(err instanceof ApiError ? err.message : 'Could not update facility review.');
     }
   };
 
   return (
-    <Modal isOpen title={`Reject ${tenant.name}`} onClose={onClose}>
+    <Modal isOpen title={`Request updates for ${tenant.name}`} onClose={onClose}>
       <form onSubmit={onSubmit} className="space-y-4">
-        <Field label="Reason for rejection" required>
-          <Textarea required value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Explain what needs correcting…" />
+        <Field label="What needs to be corrected?" required>
+          <Textarea required value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Explain what the facility should update before approval." />
         </Field>
         <Button type="submit" variant="danger" className="w-full" loading={rejectTenant.isPending}>
-          Confirm rejection
+          Send update request
         </Button>
       </form>
     </Modal>
@@ -60,52 +60,47 @@ export default function AdminTenantsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Onboarding" title="Facility Approvals" description="Review and verify registration details before activating a facility." />
+      <PageHeader eyebrow="Facility Reviews" title="Facility Reviews" description="Review new hospitals, clinics, pharmacies, and care centers before they join Medora." />
 
-      {isLoading && (
-        <div className="flex justify-center py-16">
-          <Spinner />
-        </div>
-      )}
+      {isLoading && <div className="flex justify-center py-16"><Spinner /></div>}
       {error && <ErrorState message={(error as ApiError).message} onRetry={() => refetch()} />}
       {!isLoading && !error && (!pendingTenants || pendingTenants.content.length === 0) && (
         <EmptyState icon={Building2} title="Nothing to review" description="All facility registrations have been processed." />
       )}
 
-      <div className="space-y-4">
+      <div className="grid gap-5 xl:grid-cols-2">
         {pendingTenants?.content.map((t) => (
-          <Card key={t.id}>
+          <Card key={t.id} className="border-brand-100/70 transition-all hover:-translate-y-0.5 hover:border-brand-200">
             <CardContent>
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-ink-900">{t.name}</h3>
-                    <Badge tone="neutral">{t.type.replace('_', ' ')}</Badge>
+              <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-ink-950">{t.name}</h3>
+                      <Badge tone="neutral" className="mt-1">{t.type.replace('_', ' ')}</Badge>
+                    </div>
                   </div>
-                  <div className="mt-2 space-y-1 text-xs text-ink-500">
-                    <p className="flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5" /> {t.address}, {t.city}, {t.province} {t.postalCode}
-                    </p>
-                    <p className="flex items-center gap-1.5">
-                      <Phone className="h-3.5 w-3.5" /> {t.phone}
-                    </p>
-                    <p className="flex items-center gap-1.5">
-                      <Mail className="h-3.5 w-3.5" /> {t.email}
-                    </p>
-                    <p>Registration No. {t.registrationNumber}</p>
+                  <div className="mt-4 space-y-2 text-xs font-semibold text-ink-500">
+                    <p className="flex items-start gap-2"><MapPin className="mt-0.5 h-3.5 w-3.5 text-brand-600" /> {t.address}, {t.city}, {t.province} {t.postalCode}</p>
+                    <p className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-brand-600" /> {t.phone}</p>
+                    <p className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-brand-600" /> {t.email}</p>
+                    <p className="flex items-center gap-2"><FileText className="h-3.5 w-3.5 text-brand-600" /> Registration No. {t.registrationNumber}</p>
                     {t.licenseDocumentUrl && (
-                      <a href={t.licenseDocumentUrl} target="_blank" rel="noreferrer" className="font-semibold text-brand-600 hover:underline">
+                      <a href={t.licenseDocumentUrl} target="_blank" rel="noreferrer" className="inline-flex font-black text-brand-600 hover:underline">
                         View license document
                       </a>
                     )}
                   </div>
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex shrink-0 gap-2 sm:flex-col">
                   <Button size="sm" icon={<CheckCircle2 className="h-3.5 w-3.5" />} loading={approveTenant.isPending} onClick={() => onApprove(t)}>
                     Approve
                   </Button>
                   <Button size="sm" variant="outline" icon={<XCircle className="h-3.5 w-3.5" />} onClick={() => setRejecting(t)}>
-                    Reject
+                    Request updates
                   </Button>
                 </div>
               </div>

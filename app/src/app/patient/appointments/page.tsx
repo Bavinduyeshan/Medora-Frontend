@@ -51,10 +51,10 @@ export default function PatientAppointmentsPage() {
 
       <div className="space-y-3">
         {sorted?.map((a) => (
-          <div key={a.id} className="flex flex-col gap-3 rounded-2xl border border-ink-100 bg-white p-5 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:justify-between">
+          <div key={a.id} className="flex flex-col gap-3 rounded-2xl border border-brand-100/70 bg-white p-5 shadow-[var(--shadow-card)] sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-sm font-bold text-ink-900">{formatDateTime(a.appointmentStart)}</p>
+                <p className="text-sm font-black text-ink-950">{formatDateTime(a.appointmentStart)}</p>
                 <Badge tone={STATUS_TONE[a.status]}>{a.status}</Badge>
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-500">

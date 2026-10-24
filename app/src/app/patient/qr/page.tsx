@@ -44,7 +44,7 @@ export default function PatientQrPage() {
             {error && <ErrorState message={(error as ApiError).message} onRetry={() => refetch()} />}
             {qr && (
               <>
-                <div className="rounded-2xl border border-ink-100 bg-white p-5 shadow-[var(--shadow-card)]">
+                <div className="rounded-2xl border border-brand-100/70 bg-white p-5 shadow-[var(--shadow-card)]">
                   <QRCodeSVG value={qr.qrToken} size={200} level="M" includeMargin />
                 </div>
                 <div className="space-y-1">

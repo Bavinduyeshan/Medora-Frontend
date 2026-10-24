@@ -17,13 +17,13 @@ export default function DoctorAffiliationsPage() {
       <PageHeader
         eyebrow="Hospital Network"
         title="Affiliations"
-        description="Facilities where you are authorized to view records and write new diagnoses."
+        description="Facilities where you can support patient care."
       />
 
       <div className="flex items-start gap-2.5 rounded-2xl border border-sky-100 bg-sky-50 p-4 text-xs text-sky-700">
         <Info className="mt-0.5 h-4 w-4 shrink-0" />
         Affiliations are granted directly by a hospital&apos;s administrator from their portal, and verified on
-        every scan and record write. To join a new facility, ask their admin to add you using your SLMC number.
+        every scan and record write. To join a new facility, ask their admin to add you using your medical registration number.
       </div>
 
       {isLoading && (
@@ -46,7 +46,7 @@ export default function DoctorAffiliationsPage() {
                     <Building2 className="h-4.5 w-4.5 text-ink-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-ink-900">{a.tenantName || a.tenantId}</p>
+                    <p className="text-sm font-black text-ink-950">{a.tenantName || a.tenantId}</p>
                     <p className="text-xs text-ink-500">{a.roleAtTenant}</p>
                   </div>
                 </div>

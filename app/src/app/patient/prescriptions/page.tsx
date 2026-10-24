@@ -27,7 +27,7 @@ export default function PatientPrescriptionsPage() {
         description="Medication prescribed to you across every facility in the network."
       />
 
-      <div className="relative max-w-sm">
+      <div className="relative max-w-md">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" />
         <Input placeholder="Search medicine name…" className="pl-9" value={query} onChange={(e) => setQuery(e.target.value)} />
       </div>
@@ -55,7 +55,7 @@ export default function PatientPrescriptionsPage() {
                 {p.items.map((item) => (
                   <div key={item.id} className="flex flex-col justify-between gap-1 rounded-xl bg-ink-50 p-3.5 sm:flex-row sm:items-center">
                     <div>
-                      <p className="text-sm font-bold text-ink-800">
+                      <p className="text-sm font-black text-ink-950">
                         {item.medicineName} {item.dosage && <span className="text-ink-500 font-semibold">· {item.dosage}</span>}
                       </p>
                       <p className="text-xs text-ink-500">

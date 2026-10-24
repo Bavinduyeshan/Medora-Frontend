@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { Users2, LayoutGrid, CalendarDays, ArrowRight, MapPin, Phone } from 'lucide-react';
+import { ArrowRight, CalendarDays, CheckCircle2, FileBarChart, LayoutGrid, MapPin, Phone, ShieldCheck, Users2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTenant, useTenantAffiliations, useTenantAppointments, useTenantDepartments } from '@/hooks/useHospitalData';
 import { Card, CardContent } from '@/components/ui/Card';
 import { PageHeader, StatCard, Spinner, EmptyState } from '@/components/ui/Feedback';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { formatDateTime } from '@/lib/utils';
 
 export default function HospitalDashboardPage() {
@@ -24,39 +25,48 @@ export default function HospitalDashboardPage() {
     .slice(0, 6);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
-        eyebrow={tenant?.type?.replace('_', ' ')}
+        eyebrow={tenant?.type?.replace('_', ' ') || 'Facility Portal'}
         title={tenant?.name || 'Facility Dashboard'}
-        description={tenant ? `${tenant.address}, ${tenant.city}, ${tenant.province}` : ''}
-        actions={<Badge tone={tenant?.status === 'APPROVED' ? 'success' : 'warning'}>{tenant?.status}</Badge>}
+        description={tenant ? `${tenant.address}, ${tenant.city}, ${tenant.province}` : 'Manage doctors, departments, appointments, and facility reports from one operating workspace.'}
+        actions={
+          <div className="flex items-center gap-3">
+            <Badge tone={tenant?.status === 'APPROVED' ? 'success' : 'warning'}>{tenant?.status || 'PENDING'}</Badge>
+            <Link href="/hospital/reports"><Button icon={<FileBarChart className="h-4 w-4" />}>Reports</Button></Link>
+          </div>
+        }
       />
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard icon={Users2} label="Active Doctors" value={activeDoctors} tone="brand" />
-        <StatCard icon={Users2} label="Pending Requests" value={pendingRequests} tone="amber" />
-        <StatCard icon={LayoutGrid} label="Departments" value={departments?.length ?? '—'} tone="sky" />
-        <StatCard icon={CalendarDays} label="Upcoming Visits" value={upcoming?.length ?? '—'} tone="ink" />
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon={Users2} label="Active Doctors" value={activeDoctors} hint="approved clinicians" tone="brand" />
+        <StatCard icon={Users2} label="Pending Requests" value={pendingRequests} hint="credential reviews" tone="amber" />
+        <StatCard icon={LayoutGrid} label="Departments" value={departments?.length ?? '-'} hint="care units" tone="sky" />
+        <StatCard icon={CalendarDays} label="Upcoming Visits" value={upcoming?.length ?? '-'} hint="next scheduled visits" tone="ink" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <div className="flex items-center justify-between p-5 sm:p-6 pb-0">
-            <h3 className="text-base font-bold text-ink-900">Upcoming appointments</h3>
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <Card>
+          <div className="flex items-center justify-between border-b border-ink-100 px-6 py-5">
+            <div>
+              <h3 className="text-lg font-black text-ink-950">Upcoming Appointments</h3>
+              <p className="mt-1 text-sm text-ink-500">Facility schedule across departments and affiliated doctors.</p>
+            </div>
           </div>
           <CardContent>
-            {apptLoading && (
-              <div className="flex justify-center py-10">
-                <Spinner />
-              </div>
-            )}
+            {apptLoading && <div className="flex justify-center py-10"><Spinner /></div>}
             {!apptLoading && (!upcoming || upcoming.length === 0) && <EmptyState icon={CalendarDays} title="Nothing scheduled" />}
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {upcoming?.map((a) => (
-                <div key={a.id} className="flex items-center justify-between rounded-xl border border-ink-100 p-3.5">
-                  <div>
-                    <p className="text-xs font-bold text-ink-800">{a.doctorName || 'Doctor'}</p>
-                    <p className="text-[11px] text-ink-500">{formatDateTime(a.appointmentStart)}</p>
+                <div key={a.id} className="flex items-center justify-between rounded-2xl border border-ink-100 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+                      <CalendarDays className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-ink-950">{a.doctorName || 'Doctor'}</p>
+                      <p className="mt-1 text-xs font-semibold text-ink-500">{formatDateTime(a.appointmentStart)}</p>
+                    </div>
                   </div>
                   <Badge tone="brand">{a.status}</Badge>
                 </div>
@@ -66,49 +76,72 @@ export default function HospitalDashboardPage() {
         </Card>
 
         <Card>
-          <div className="p-5 sm:p-6 pb-0">
-            <h3 className="text-base font-bold text-ink-900">Facility details</h3>
+          <div className="border-b border-ink-100 px-6 py-5">
+            <h3 className="text-lg font-black text-ink-950">Facility Details</h3>
+            <p className="mt-1 text-sm text-ink-500">Verified registration profile for this workspace.</p>
           </div>
-          <CardContent className="space-y-3">
-            <div className="flex items-start gap-2.5 text-xs text-ink-600">
-              <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-400" />
-              {tenant ? `${tenant.address}, ${tenant.city}, ${tenant.province} ${tenant.postalCode}` : '—'}
+          <CardContent className="space-y-4">
+            <div className="flex items-start gap-3 rounded-2xl bg-ink-50 p-4 text-sm font-semibold text-ink-700">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-600" />
+              {tenant ? `${tenant.address}, ${tenant.city}, ${tenant.province} ${tenant.postalCode}` : '-'}
             </div>
-            <div className="flex items-center gap-2.5 text-xs text-ink-600">
-              <Phone className="h-3.5 w-3.5 shrink-0 text-ink-400" />
-              {tenant?.phone}
+            <div className="flex items-center gap-3 rounded-2xl bg-ink-50 p-4 text-sm font-semibold text-ink-700">
+              <Phone className="h-4 w-4 shrink-0 text-brand-600" />
+              {tenant?.phone || '-'}
             </div>
-            <div className="text-xs text-ink-500">Registration No. {tenant?.registrationNumber}</div>
+            <div className="rounded-2xl border border-brand-100 bg-brand-50 p-4 text-sm font-bold text-brand-700">
+              Registration No. {tenant?.registrationNumber || '-'}
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <div className="flex items-center justify-between p-5 sm:p-6 pb-0">
-          <h3 className="text-base font-bold text-ink-900">Doctor affiliations</h3>
-          <Link href="/hospital/affiliations" className="flex items-center gap-1 text-xs font-semibold text-brand-600 hover:text-brand-700">
-            Manage all <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-        <CardContent>
-          {affLoading && (
-            <div className="flex justify-center py-10">
-              <Spinner />
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <Card>
+          <div className="flex items-center justify-between border-b border-ink-100 px-6 py-5">
+            <div>
+              <h3 className="text-lg font-black text-ink-950">Doctor Affiliations</h3>
+              <p className="mt-1 text-sm text-ink-500">Credentialed clinicians connected to this facility.</p>
             </div>
-          )}
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {affiliations?.slice(0, 6).map((a) => (
-              <div key={a.id} className="flex items-center justify-between rounded-xl border border-ink-100 p-3.5">
-                <div>
-                  <p className="text-xs font-bold text-ink-800">{a.doctorName || a.doctorId}</p>
-                  <p className="text-[11px] text-ink-500">{a.roleAtTenant}</p>
+            <Link href="/hospital/affiliations" className="flex items-center gap-1 text-sm font-black text-brand-600 hover:text-brand-700">
+              Manage all <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <CardContent>
+            {affLoading && <div className="flex justify-center py-10"><Spinner /></div>}
+            <div className="grid gap-3 sm:grid-cols-2">
+              {affiliations?.slice(0, 6).map((a) => (
+                <div key={a.id} className="rounded-2xl border border-ink-100 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-black text-ink-950">{a.doctorName || a.doctorId}</p>
+                      <p className="mt-1 text-xs font-semibold text-ink-500">{a.roleAtTenant}</p>
+                    </div>
+                    <Badge tone={a.status === 'ACTIVE' ? 'success' : a.status === 'PENDING' ? 'warning' : 'neutral'}>{a.status}</Badge>
+                  </div>
                 </div>
-                <Badge tone={a.status === 'ACTIVE' ? 'success' : a.status === 'PENDING' ? 'warning' : 'neutral'}>{a.status}</Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="rounded-[1.35rem] bg-ink-950 p-6 text-white shadow-2xl shadow-ink-950/15">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-cyan-200">
+            <ShieldCheck className="h-5 w-5" />
+          </div>
+          <h3 className="mt-6 text-xl font-black">Care Operations Mesh</h3>
+          <p className="mt-3 text-sm leading-7 text-white/70">
+            Facility admins coordinate doctor access, department capacity, and scheduled visits through clear Medora workflows.
+          </p>
+          <div className="mt-7 space-y-3">
+            {['Approved doctor scope', 'Department routing', 'Clear activity reviews'].map((item) => (
+              <div key={item} className="flex items-center gap-3 rounded-2xl bg-white/8 p-3 text-sm font-bold text-white/82">
+                <CheckCircle2 className="h-4 w-4 text-cyan-200" /> {item}
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

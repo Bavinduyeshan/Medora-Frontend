@@ -1,7 +1,7 @@
 'use client';
 
 import { toast } from 'sonner';
-import { FileBarChart, Download, Plus } from 'lucide-react';
+import { FileBarChart, Download, Plus, Clock3 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useGenerateReport, useTenantReports } from '@/hooks/useHospitalData';
 import { PageHeader, EmptyState, Spinner, ErrorState } from '@/components/ui/Feedback';
@@ -29,53 +29,48 @@ export default function HospitalReportsPage() {
     if (!tenantId) return;
     try {
       await generateReport.mutateAsync({ reportType: 'TENANT_ACTIVITY', tenantId });
-      toast.success('Report generation started.');
+      toast.success('Report is being prepared.');
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Could not generate report.');
+      toast.error(err instanceof ApiError ? err.message : 'Could not prepare report.');
     }
   };
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Analytics"
-        title="Activity Reports"
-        description="Generate and download activity reports for your facility."
-        actions={
-          <Button icon={<Plus className="h-4 w-4" />} loading={generateReport.isPending} onClick={onGenerate}>
-            Generate report
-          </Button>
-        }
+        eyebrow="Insights"
+        title="Facility Reports"
+        description="Prepare simple summaries for facility activity, team reviews, and operational planning."
+        actions={<Button icon={<Plus className="h-4 w-4" />} loading={generateReport.isPending} onClick={onGenerate}>Prepare report</Button>}
       />
 
-      {isLoading && (
-        <div className="flex justify-center py-16">
-          <Spinner />
-        </div>
-      )}
+      {isLoading && <div className="flex justify-center py-16"><Spinner /></div>}
       {error && <ErrorState message={(error as ApiError).message} onRetry={() => refetch()} />}
       {!isLoading && !error && (!reports || reports.length === 0) && (
-        <EmptyState icon={FileBarChart} title="No reports generated yet" description="Generate your first facility activity report." />
+        <EmptyState icon={FileBarChart} title="No reports yet" description="Prepare your first facility report when you are ready." />
       )}
 
-      <div className="space-y-3">
+      <div className="grid gap-4 lg:grid-cols-2">
         {reports?.map((r) => (
-          <Card key={r.id}>
-            <CardContent className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-bold text-ink-900">{r.reportType.replace('_', ' ')}</p>
-                <p className="text-xs text-ink-500">Requested {formatDateTime(r.createdAt)}</p>
-              </div>
-              <div className="flex items-center gap-3">
+          <Card key={r.id} className="border-brand-100/70 transition-all hover:-translate-y-0.5 hover:border-brand-200">
+            <CardContent>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-50 text-brand-700">
+                    <FileBarChart className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-black text-ink-950">{r.reportType.replace('_', ' ')}</p>
+                    <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-ink-500"><Clock3 className="h-3.5 w-3.5" /> Requested {formatDateTime(r.createdAt)}</p>
+                  </div>
+                </div>
                 <Badge tone={STATUS_TONE[r.status]}>{r.status}</Badge>
-                {r.status === 'COMPLETED' && r.fileUrl && (
-                  <a href={r.fileUrl} target="_blank" rel="noreferrer">
-                    <Button size="sm" variant="outline" icon={<Download className="h-3.5 w-3.5" />}>
-                      Download
-                    </Button>
-                  </a>
-                )}
               </div>
+              {r.status === 'COMPLETED' && r.fileUrl && (
+                <a href={r.fileUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex">
+                  <Button size="sm" variant="outline" icon={<Download className="h-3.5 w-3.5" />}>Download</Button>
+                </a>
+              )}
             </CardContent>
           </Card>
         ))}

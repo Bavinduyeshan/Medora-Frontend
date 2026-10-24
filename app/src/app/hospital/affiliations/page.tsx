@@ -43,18 +43,18 @@ function AddAffiliationModal({ isOpen, onClose, tenantId }: { isOpen: boolean; o
     if (!selected) return;
     try {
       await addAffiliation.mutateAsync({ doctorId: selected.id, departmentId: departmentId || undefined, roleAtTenant });
-      toast.success(`${fullName(selected.firstName, selected.lastName)} added to your facility.`);
+      toast.success(`${fullName(selected.firstName, selected.lastName)} added to your care team.`);
       setSelected(null);
       setQuery('');
       setResults([]);
       onClose();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Could not add affiliation.');
+      toast.error(err instanceof ApiError ? err.message : 'Could not add doctor.');
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add doctor affiliation" description="Search by name, specialization, or SLMC number.">
+    <Modal isOpen={isOpen} onClose={onClose} title="Add doctor to care team" description="Search by name, specialty, or registration number.">
       <div className="space-y-4">
         <div className="flex gap-2">
           <Input placeholder="Search doctors…" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onSearch()} />
@@ -69,12 +69,12 @@ function AddAffiliationModal({ isOpen, onClose, tenantId }: { isOpen: boolean; o
               key={d.id}
               onClick={() => setSelected(d)}
               className={`flex w-full items-center justify-between rounded-xl border p-3 text-left transition-colors ${
-                selected?.id === d.id ? 'border-brand-500 bg-brand-50' : 'border-ink-100 hover:bg-ink-50'
+                selected?.id === d.id ? 'border-brand-500 bg-brand-50' : 'border-ink-100 hover:bg-brand-50/40'
               }`}
             >
               <div>
-                <p className="text-xs font-bold text-ink-800">{fullName(d.firstName, d.lastName)}</p>
-                <p className="text-[11px] text-ink-500">{d.specialization} · SLMC {d.slmcNumber}</p>
+                <p className="text-xs font-black text-ink-950">{fullName(d.firstName, d.lastName)}</p>
+                <p className="text-[11px] text-ink-500">{d.specialization} · Reg. {d.slmcNumber}</p>
               </div>
               {selected?.id === d.id && <CheckCircle2 className="h-4 w-4 text-brand-600" />}
             </button>
@@ -97,7 +97,7 @@ function AddAffiliationModal({ isOpen, onClose, tenantId }: { isOpen: boolean; o
               </Select>
             </Field>
             <Button className="w-full" loading={addAffiliation.isPending} onClick={onSubmit} icon={<UserPlus className="h-4 w-4" />}>
-              Add affiliation
+              Add doctor
             </Button>
           </div>
         )}
@@ -116,9 +116,9 @@ export default function HospitalAffiliationsPage() {
   const onToggleStatus = async (doctorId: string, status: 'ACTIVE' | 'INACTIVE') => {
     try {
       await updateStatus.mutateAsync({ doctorId, status });
-      toast.success(`Affiliation ${status === 'ACTIVE' ? 'activated' : 'deactivated'}.`);
+      toast.success(`Doctor access ${status === 'ACTIVE' ? 'activated' : 'deactivated'}.`);
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Could not update affiliation.');
+      toast.error(err instanceof ApiError ? err.message : 'Could not update doctor access.');
     }
   };
 
@@ -126,8 +126,8 @@ export default function HospitalAffiliationsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Hospital Network"
-        title="Doctor Affiliations"
-        description="Grant or revoke clinical privileges for doctors at your facility."
+        title="Care Team Doctors"
+        description="Manage which doctors can work with patients at your facility."
         actions={
           <Button icon={<UserPlus className="h-4 w-4" />} onClick={() => setAddOpen(true)}>
             Add doctor
@@ -142,16 +142,16 @@ export default function HospitalAffiliationsPage() {
       )}
       {error && <ErrorState message={(error as ApiError).message} onRetry={() => refetch()} />}
       {!isLoading && !error && (!affiliations || affiliations.length === 0) && (
-        <EmptyState icon={Building2} title="No affiliated doctors yet" description="Add a doctor to grant them access to write records at your facility." />
+        <EmptyState icon={Building2} title="No doctors added yet" description="Add doctors so they can support care at your facility." />
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         {affiliations?.map((a) => (
-          <Card key={a.id}>
+          <Card key={a.id} className="border-brand-100/70 transition-all hover:-translate-y-0.5 hover:border-brand-200">
             <CardContent>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-bold text-ink-900">{a.doctorName || a.doctorId}</p>
+                  <p className="text-sm font-black text-ink-950">{a.doctorName || a.doctorId}</p>
                   <p className="text-xs text-ink-500">{a.roleAtTenant}</p>
                   <p className="mt-1 text-[11px] text-ink-400">Since {formatDate(a.createdAt)}</p>
                 </div>
