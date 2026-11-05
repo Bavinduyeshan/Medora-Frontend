@@ -1,5 +1,6 @@
 "use client";
 
+import { FacilityDirectory } from "@/components/admin/FacilityDirectory";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -208,6 +209,7 @@ export default function AdminTenantsPage() {
         ))}
       </div>
 
+      <FacilityDirectory />
       <RejectModal tenant={rejecting} onClose={() => setRejecting(null)} />
     </div>
   );

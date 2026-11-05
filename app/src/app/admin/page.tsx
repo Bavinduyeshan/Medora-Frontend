@@ -4,11 +4,9 @@ import Link from "next/link";
 import {
   ArrowRight,
   Building2,
-  Download,
   FileText,
   LockKeyhole,
   Plus,
-  Server,
   ShieldCheck,
   Users,
 } from "lucide-react";

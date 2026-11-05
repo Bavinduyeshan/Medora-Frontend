@@ -25,7 +25,7 @@ import type { UserRoleApi } from "@/types/api";
 function RegisterForm() {
   const params = useSearchParams();
   const router = useRouter();
-  const { register, login } = useAuth();
+  const { register } = useAuth();
   const [role, setRole] = useState<Extract<UserRoleApi, "PATIENT" | "DOCTOR">>(
     params.get("role") === "doctor" ? "DOCTOR" : "PATIENT",
   );
@@ -44,8 +44,15 @@ function RegisterForm() {
       setError("Passwords do not match.");
       return;
     }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+    if (
+      password.length < 8 ||
+      !/[a-z]/.test(password) ||
+      !/[A-Z]/.test(password) ||
+      !/\d/.test(password)
+    ) {
+      setError(
+        "Password must be at least 8 characters with uppercase, lowercase, and a number.",
+      );
       return;
     }
     if (!accepted) {
@@ -54,8 +61,7 @@ function RegisterForm() {
     }
     setLoading(true);
     try {
-      await register({ username, email, password, role });
-      const user = await login({ email, password });
+      const user = await register({ username, email, password, role });
       toast.success("Account created. Let us finish setting up your profile.");
       router.push(roleHomePath(user.role));
     } catch (err) {
@@ -154,7 +160,7 @@ function RegisterForm() {
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 8 characters"
+              placeholder="8+ characters, uppercase, lowercase, and a number"
             />
           </Field>
           <Field label="Confirm password" required>

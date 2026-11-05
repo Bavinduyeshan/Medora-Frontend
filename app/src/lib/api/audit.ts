@@ -1,5 +1,6 @@
-import { http, unwrap } from '../http';
-import type { AuditLogDto, PageResponse } from '../../types/api';
+import { adapters } from "./adapters";
+import { http, unwrap } from "../http";
+import type { AuditLogDto, PageResponse } from "../../types/api";
 
 export interface AuditSearchParams {
   action?: string;
@@ -13,11 +14,26 @@ export interface AuditSearchParams {
 
 export const auditApi = {
   search: (params: AuditSearchParams = {}) =>
-    unwrap<PageResponse<AuditLogDto>>(http.get('/api/audit/logs', { params: { page: 0, size: 20, ...params } })),
+    unwrap<PageResponse<AuditLogDto>>(
+      http.get("/api/audit/logs", { params: { page: 0, size: 20, ...params } }),
+      adapters.audit,
+    ),
 
-  byPatient: (patientId: string) => unwrap<AuditLogDto[]>(http.get(`/api/audit/logs/patient/${patientId}`)),
+  byPatient: (patientId: string) =>
+    unwrap<PageResponse<AuditLogDto>>(
+      http.get(`/api/audit/logs/patient/${patientId}`),
+      adapters.audit,
+    ),
 
-  byTenant: (tenantId: string) => unwrap<AuditLogDto[]>(http.get(`/api/audit/logs/tenant/${tenantId}`)),
+  byTenant: (tenantId: string) =>
+    unwrap<PageResponse<AuditLogDto>>(
+      http.get(`/api/audit/logs/tenant/${tenantId}`),
+      adapters.audit,
+    ),
 
-  byActor: (userId: string) => unwrap<AuditLogDto[]>(http.get(`/api/audit/logs/actor/${userId}`)),
+  byActor: (userId: string) =>
+    unwrap<PageResponse<AuditLogDto>>(
+      http.get(`/api/audit/logs/actor/${userId}`),
+      adapters.audit,
+    ),
 };

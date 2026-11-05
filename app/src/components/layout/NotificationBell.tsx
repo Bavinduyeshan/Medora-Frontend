@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Bell, CheckCheck } from "lucide-react";
 import {
@@ -12,6 +13,7 @@ import { EmptyState, ErrorState, Spinner } from "@/components/ui/Feedback";
 import { Modal } from "@/components/ui/Modal";
 
 export function NotificationBell() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const { data: unreadCount } = useUnreadNotificationCount();
   const {
@@ -79,7 +81,23 @@ export function NotificationBell() {
             <button
               key={item.id}
               disabled={markRead.isPending}
-              onClick={() => item.status !== "READ" && markRead.mutate(item.id)}
+              onClick={async () => {
+                if (item.status !== "READ") {
+                  try {
+                    await markRead.mutateAsync(item.id);
+                  } catch {
+                    return;
+                  }
+                }
+                if (
+                  item.deepLink?.startsWith("/") &&
+                  !item.deepLink.startsWith("//") &&
+                  !item.deepLink.includes("\\")
+                ) {
+                  setOpen(false);
+                  router.push(item.deepLink);
+                }
+              }}
               className={cn(
                 "flex w-full flex-col gap-1.5 rounded-xl border border-ink-100 p-4 text-left transition-colors hover:bg-ink-50",
                 item.status !== "READ" && "border-brand-100 bg-brand-50/40",

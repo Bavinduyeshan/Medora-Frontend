@@ -33,7 +33,7 @@ export default function DoctorAffiliationsPage() {
       <div className="flex items-start gap-2.5 rounded-2xl border border-sky-100 bg-sky-50 p-4 text-xs text-sky-700">
         <Info className="mt-0.5 h-4 w-4 shrink-0" />
         Affiliations are granted directly by a hospital&apos;s administrator
-        from their portal, and verified on every scan and record write. To join
+        from their portal, and verified when you add clinical records. To join
         a new facility, ask their admin to add you using your medical
         registration number.
       </div>

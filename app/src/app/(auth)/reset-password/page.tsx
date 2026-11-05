@@ -23,6 +23,17 @@ function ResetForm() {
       setError("Passwords do not match.");
       return;
     }
+    if (
+      password.length < 8 ||
+      !/[a-z]/.test(password) ||
+      !/[A-Z]/.test(password) ||
+      !/\d/.test(password)
+    ) {
+      setError(
+        "Use at least 8 characters with uppercase, lowercase, and a number.",
+      );
+      return;
+    }
     if (!token) return;
     setLoading(true);
     try {
@@ -61,7 +72,7 @@ function ResetForm() {
               minLength={8}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="At least 8 characters"
+              placeholder="8+ characters, uppercase, lowercase, and a number"
             />
           </Field>
           <Field label="Confirm new password" required>

@@ -80,8 +80,8 @@ export function AffiliationStatusNote() {
   return (
     <p className="flex items-center gap-2 text-[12px] text-ink-400">
       <ShieldCheck className="h-3.5 w-3.5" /> Affiliations are granted by
-      hospital administrators and verified server-side before every scan and
-      record write.
+      hospital administrators and verified server-side before clinical record
+      writes.
     </p>
   );
 }

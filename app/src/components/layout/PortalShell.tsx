@@ -11,7 +11,6 @@ import {
   Menu,
   Search,
   ShieldCheck,
-  X,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";

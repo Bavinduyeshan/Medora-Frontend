@@ -1,5 +1,10 @@
-﻿import { http, unwrap } from '../http';
-import type { NotificationDto, NotificationType, PageResponse } from '../../types/api';
+import { adapters } from "./adapters";
+import { http, unwrap } from "../http";
+import type {
+  NotificationDto,
+  NotificationType,
+  PageResponse,
+} from "../../types/api";
 
 export const notificationsApi = {
   send: (payload: {
@@ -9,15 +14,28 @@ export const notificationsApi = {
     body: string;
     deepLink?: string;
     scheduledFor?: string | null;
-  }) => unwrap<NotificationDto>(http.post('/api/notifications/send', payload)),
+  }) =>
+    unwrap<NotificationDto>(
+      http.post("/api/notifications/send", payload),
+      adapters.notification,
+    ),
 
   my: (page = 0, size = 20) =>
-    unwrap<PageResponse<NotificationDto>>(http.get('/api/notifications/my', { params: { page, size } })),
+    unwrap<PageResponse<NotificationDto>>(
+      http.get("/api/notifications/my", { params: { page, size } }),
+      adapters.notification,
+    ),
 
   unreadCount: async () => {
-    const data = await unwrap<{ unreadCount: number }>(http.get('/api/notifications/unread-count'));
+    const data = await unwrap<{ unreadCount: number }>(
+      http.get("/api/notifications/unread-count"),
+    );
     return data.unreadCount ?? 0;
   },
 
-  markRead: (id: string) => unwrap<NotificationDto>(http.put(`/api/notifications/${id}/read`)),
+  markRead: (id: string) =>
+    unwrap<NotificationDto>(
+      http.put(`/api/notifications/${id}/read`),
+      adapters.notification,
+    ),
 };

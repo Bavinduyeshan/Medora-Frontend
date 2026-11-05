@@ -1,7 +1,17 @@
-﻿import { http, unwrap } from '../http';
-import type { AccountStatus, AuthTokensDto, PageResponse, UserDto } from '../../types/api';
+import { adapters } from "./adapters";
+import { http, unwrap } from "../http";
+import type {
+  AccountStatus,
+  AuthTokensDto,
+  PageResponse,
+  UserDto,
+} from "../../types/api";
 
-function pageFromArray<T>(content: T[], page: number, size: number): PageResponse<T> {
+function pageFromArray<T>(
+  content: T[],
+  page: number,
+  size: number,
+): PageResponse<T> {
   const start = page * size;
   const paged = content.slice(start, start + size);
   const totalPages = Math.max(1, Math.ceil(content.length / size));
@@ -17,14 +27,18 @@ function pageFromArray<T>(content: T[], page: number, size: number): PageRespons
 }
 
 export const usersApi = {
-  me: () => unwrap<UserDto>(http.get('/api/users/me')),
+  me: () => unwrap<UserDto>(http.get("/api/users/me"), adapters.user),
 
   list: async (page = 0, size = 20) => {
-    const users = await unwrap<UserDto[]>(http.get('/api/users'));
+    const users = await unwrap<UserDto[]>(
+      http.get("/api/users"),
+      adapters.user,
+    );
     return pageFromArray(users, page, size);
   },
 
-  getById: (id: string) => unwrap<UserDto>(http.get(`/api/users/${id}`)),
+  getById: (id: string) =>
+    unwrap<UserDto>(http.get(`/api/users/${id}`), adapters.user),
 
   updateStatus: (id: string, status: AccountStatus) =>
     unwrap<void>(http.put(`/api/users/${id}/status`, { status })),
@@ -36,14 +50,18 @@ export const usersApi = {
     role: string;
     tenantId?: string | null;
   }) => {
-    const tokens = await unwrap<AuthTokensDto>(http.post('/api/users/admin/create', payload));
+    const tokens = await unwrap<AuthTokensDto>(
+      http.post("/api/users/admin/create", payload),
+      adapters.auth,
+    );
     return tokens.user as UserDto;
   },
 
   assignTenant: (id: string, tenantId: string) =>
     unwrap<void>(http.put(`/api/users/${id}/tenant`, { tenantId })),
 
-  listByTenant: (tenantId: string) => unwrap<UserDto[]>(http.get(`/api/users/tenant/${tenantId}`)),
+  listByTenant: (tenantId: string) =>
+    unwrap<UserDto[]>(http.get(`/api/users/tenant/${tenantId}`), adapters.user),
 
   remove: (id: string) => unwrap<void>(http.delete(`/api/users/${id}`)),
 };

@@ -10,6 +10,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useCreatePatientProfile } from "@/hooks/usePatientData";
+import { useQueryClient } from "@tanstack/react-query";
+import { patientsApi } from "@/lib/api/patients";
+import type { PatientDto } from "@/types/api";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Select, Textarea } from "@/components/ui/Field";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -31,27 +34,34 @@ const BLOOD_GROUPS: BloodGroup[] = [
 
 type FormState = Omit<PatientCreatePayload, "userId">;
 
-export function PatientOnboarding() {
+export function PatientOnboarding({
+  initialData,
+}: { initialData?: PatientDto } = {}) {
+  const qc = useQueryClient();
   const { user } = useAuth();
   const createProfile = useCreatePatientProfile();
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState<FormState>({
-    firstName: "",
-    lastName: "",
-    dateOfBirth: "",
-    gender: "PREFER_NOT_TO_SAY" as GenderType,
-    bloodGroup: "UNKNOWN",
-    nationalId: "",
-    email: user?.email || "",
-    phone: "",
-    emergencyContactName: "",
-    emergencyContactPhone: "",
-    address: "",
-    city: "",
-    province: "",
-    allergies: "",
-    chronicConditions: "",
-  });
+  const [form, setForm] = useState<FormState>(
+    initialData
+      ? { ...initialData }
+      : {
+          firstName: "",
+          lastName: "",
+          dateOfBirth: "",
+          gender: "PREFER_NOT_TO_SAY" as GenderType,
+          bloodGroup: "UNKNOWN",
+          nationalId: "",
+          email: user?.email || "",
+          phone: "",
+          emergencyContactName: "",
+          emergencyContactPhone: "",
+          address: "",
+          city: "",
+          province: "",
+          allergies: "",
+          chronicConditions: "",
+        },
+  );
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -60,8 +70,15 @@ export function PatientOnboarding() {
     e.preventDefault();
     setError(null);
     try {
-      await createProfile.mutateAsync(form);
-      toast.success("Profile created. Welcome to Medora!");
+      if (initialData) {
+        await patientsApi.update(initialData.id, form);
+        await qc.invalidateQueries({ queryKey: ["patient"] });
+      } else await createProfile.mutateAsync(form);
+      toast.success(
+        initialData
+          ? "Profile updated."
+          : "Profile created. Welcome to Medora!",
+      );
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : "Could not save your profile.",
@@ -77,7 +94,9 @@ export function PatientOnboarding() {
             <HeartPulse className="h-7 w-7" />
           </div>
           <h1 className="mt-8 text-3xl font-semibold leading-tight tracking-tight">
-            Complete your health profile
+            {initialData
+              ? "Your health profile"
+              : "Complete your health profile"}
           </h1>
           <p className="mt-4 text-sm leading-7 text-white/80">
             Add the details care teams need to identify you, contact you, and

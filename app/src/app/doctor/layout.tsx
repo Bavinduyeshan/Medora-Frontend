@@ -1,6 +1,12 @@
 "use client";
 
-import { LayoutDashboard, CalendarDays, Building2 } from "lucide-react";
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Building2,
+  UserRound,
+  Clock3,
+} from "lucide-react";
 import { RequireRole } from "@/components/layout/RequireRole";
 import { PortalShell } from "@/components/layout/PortalShell";
 import { useCurrentDoctor } from "@/hooks/useDoctorData";
@@ -11,8 +17,10 @@ import { ApiError } from "@/lib/http";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/doctor", icon: LayoutDashboard },
-  { label: "Affiliations", href: "/doctor/affiliations", icon: Building2 },
   { label: "Appointments", href: "/doctor/appointments", icon: CalendarDays },
+  { label: "Schedules", href: "/doctor/schedules", icon: Clock3 },
+  { label: "Affiliations", href: "/doctor/affiliations", icon: Building2 },
+  { label: "Profile", href: "/doctor/profile", icon: UserRound },
 ];
 
 function DoctorGate({ children }: { children: React.ReactNode }) {

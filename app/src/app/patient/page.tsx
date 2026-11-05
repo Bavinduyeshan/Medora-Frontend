@@ -7,7 +7,6 @@ import {
   Building2,
   CalendarDays,
   FileText,
-  HeartPulse,
   Pill,
   QrCode,
   ShieldCheck,
@@ -31,7 +30,6 @@ import {
   formatBloodGroup,
   formatDate,
   formatDateTime,
-  fullName,
 } from "@/lib/utils";
 
 export default function PatientDashboardPage() {

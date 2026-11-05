@@ -15,6 +15,7 @@ import {
 import { patientsApi } from "@/lib/api/patients";
 import { useFullPatientHistory } from "@/hooks/useDoctorData";
 import { useActiveWorkspace } from "@/hooks/useActiveWorkspace";
+import { LabReportWorkspace } from '@/components/medical/LabReportWorkspace';
 import { NewDiagnosisModal } from "@/components/doctor/NewDiagnosisModal";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -170,6 +171,7 @@ export default function DoctorPatientPage({
         </CardContent>
       </Card>
 
+      <LabReportWorkspace patientId={patientId} />
       <NewDiagnosisModal
         isOpen={newRecordOpen}
         onClose={() => setNewRecordOpen(false)}

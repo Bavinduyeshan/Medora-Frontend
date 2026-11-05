@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountProvisioning } from "@/components/admin/AccountProvisioning";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -63,6 +64,7 @@ export default function AdminUsersPage() {
       <PageHeader
         eyebrow="People"
         title="People Directory"
+        actions={<AccountProvisioning />}
         description="Review patients, doctors, facility staff, and admins using Medora."
       />
 
@@ -110,6 +112,9 @@ export default function AdminUsersPage() {
               </div>
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-ink-100 pt-4">
                 <Badge tone="brand">{roleLabel(u.role)}</Badge>
+                {["HOSPITAL_ADMIN", "RECEPTIONIST", "LAB_TECHNICIAN"].includes(
+                  u.role,
+                ) && <AccountProvisioning account={u} />}
                 <Button
                   size="sm"
                   variant={u.status === "SUSPENDED" ? "outline" : "ghost"}

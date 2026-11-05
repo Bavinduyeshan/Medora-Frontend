@@ -242,8 +242,8 @@ export default function DoctorDashboardPage() {
             Before you review a patient
           </h3>
           <p className="mt-3 text-sm leading-7 text-white/70">
-            Patient records unlock only through a valid QR scan, active facility
-            context, and an approved doctor affiliation.
+            Use the patient’s QR token and select an active facility to begin a
+            consultation.
           </p>
           <div className="mt-7 space-y-3">
             {[

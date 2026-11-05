@@ -2,6 +2,8 @@
 
 import {
   LayoutDashboard,
+  UserRound,
+  FlaskConical,
   FileText,
   Pill,
   CalendarDays,
@@ -20,8 +22,10 @@ const NAV_ITEMS = [
   { label: "Dashboard", href: "/patient", icon: LayoutDashboard },
   { label: "Medical Records", href: "/patient/records", icon: FileText },
   { label: "Prescriptions", href: "/patient/prescriptions", icon: Pill },
+  { label: "Lab Reports", href: "/patient/lab-reports", icon: FlaskConical },
   { label: "Appointments", href: "/patient/appointments", icon: CalendarDays },
   { label: "My QR Code", href: "/patient/qr", icon: QrCode },
+  { label: "Profile", href: "/patient/profile", icon: UserRound },
 ];
 
 function PatientGate({ children }: { children: React.ReactNode }) {

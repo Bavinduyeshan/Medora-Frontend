@@ -1,5 +1,7 @@
 "use client";
 
+import { AppointmentWorkspace } from "@/components/appointments/AppointmentWorkspace";
+import { LabReportWorkspace } from "@/components/medical/LabReportWorkspace";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -30,7 +32,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { formatDateTime } from "@/lib/utils";
 
-export default function HospitalDashboardPage() {
+function HospitalAdminDashboard() {
   const { user } = useAuth();
   const { data: tenant } = useTenant(user?.tenantId ?? undefined);
   const { data: affiliations, isLoading: affLoading } = useTenantAffiliations(
@@ -271,4 +273,11 @@ export default function HospitalDashboardPage() {
       </div>
     </div>
   );
+}
+
+export default function HospitalDashboardPage() {
+  const { user } = useAuth();
+  if (user?.role === "RECEPTIONIST") return <AppointmentWorkspace />;
+  if (user?.role === "LAB_TECHNICIAN") return <LabReportWorkspace />;
+  return <HospitalAdminDashboard />;
 }

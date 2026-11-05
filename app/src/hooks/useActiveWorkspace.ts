@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // The Medora API models doctor <-> tenant relationships as durable
 // "affiliations" (ACTIVE / INACTIVE / PENDING), not ephemeral check-in
@@ -11,10 +11,12 @@
 // for QR scans and new medical records - every write still goes through the
 // real, authorized API calls.
 
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { sessionCookies } from "@/lib/sessionCookies";
 
 interface WorkspaceState {
+  ownerUserId: string | null;
   activeTenantId: string | null;
   checkedInAt: string | null;
   checkIn: (tenantId: string) => void;
@@ -24,11 +26,18 @@ interface WorkspaceState {
 export const useActiveWorkspace = create<WorkspaceState>()(
   persist(
     (set) => ({
+      ownerUserId: null,
       activeTenantId: null,
       checkedInAt: null,
-      checkIn: (tenantId) => set({ activeTenantId: tenantId, checkedInAt: new Date().toISOString() }),
-      checkOut: () => set({ activeTenantId: null, checkedInAt: null }),
+      checkIn: (tenantId) =>
+        set({
+          ownerUserId: sessionCookies.userId,
+          activeTenantId: tenantId,
+          checkedInAt: new Date().toISOString(),
+        }),
+      checkOut: () =>
+        set({ ownerUserId: null, activeTenantId: null, checkedInAt: null }),
     }),
-    { name: 'healthpasslk.active-workspace' }
-  )
+    { name: "healthpasslk.active-workspace" },
+  ),
 );

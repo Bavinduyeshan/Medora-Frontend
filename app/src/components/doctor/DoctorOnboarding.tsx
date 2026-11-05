@@ -10,6 +10,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useCreateDoctorProfile } from "@/hooks/useDoctorData";
+import { useQueryClient } from "@tanstack/react-query";
+import { doctorsApi } from "@/lib/api/doctors";
+import type { DoctorDto } from "@/types/api";
 import { Button } from "@/components/ui/Button";
 import { Field, Input, Textarea } from "@/components/ui/Field";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -19,23 +22,30 @@ import { useAuth } from "@/context/AuthContext";
 
 type FormState = Omit<DoctorCreatePayload, "userId">;
 
-export function DoctorOnboarding() {
+export function DoctorOnboarding({
+  initialData,
+}: { initialData?: DoctorDto } = {}) {
+  const qc = useQueryClient();
   const { user } = useAuth();
   const createProfile = useCreateDoctorProfile();
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState<FormState>({
-    firstName: "",
-    lastName: "",
-    email: user?.email || "",
-    phone: "",
-    slmcNumber: "",
-    specialization: "",
-    subSpecialization: "",
-    experienceYears: 0,
-    education: "",
-    bio: "",
-    profileImageUrl: "",
-  });
+  const [form, setForm] = useState<FormState>(
+    initialData
+      ? { ...initialData }
+      : {
+          firstName: "",
+          lastName: "",
+          email: user?.email || "",
+          phone: "",
+          slmcNumber: "",
+          specialization: "",
+          subSpecialization: "",
+          experienceYears: 0,
+          education: "",
+          bio: "",
+          profileImageUrl: "",
+        },
+  );
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -44,8 +54,13 @@ export function DoctorOnboarding() {
     e.preventDefault();
     setError(null);
     try {
-      await createProfile.mutateAsync(form);
-      toast.success("Doctor profile submitted.");
+      if (initialData) {
+        await doctorsApi.update(initialData.id, form);
+        await qc.invalidateQueries({ queryKey: ["doctor"] });
+      } else await createProfile.mutateAsync(form);
+      toast.success(
+        initialData ? "Profile updated." : "Doctor profile submitted.",
+      );
     } catch (err) {
       setError(
         err instanceof ApiError ? err.message : "Could not save your profile.",
@@ -61,7 +76,9 @@ export function DoctorOnboarding() {
             <Stethoscope className="h-7 w-7" />
           </div>
           <h1 className="mt-8 text-3xl font-semibold leading-tight tracking-tight">
-            Complete your clinical profile
+            {initialData
+              ? "Your clinical profile"
+              : "Complete your clinical profile"}
           </h1>
           <p className="mt-4 text-sm leading-7 text-white/80">
             Add your professional details so facilities can recognize your

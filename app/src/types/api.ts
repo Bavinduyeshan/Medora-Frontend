@@ -60,7 +60,7 @@ export interface UserDto {
   tenantId: string | null;
   status: AccountStatus;
   emailVerified: boolean;
-  createdAt: string;
+  createdAt?: string;
   updatedAt?: string;
 }
 
@@ -338,6 +338,8 @@ export interface PrescriptionItemPayload {
 }
 
 export interface PrescriptionDto {
+  isDispensed?: boolean;
+  dispensedAt?: string;
   id: string;
   recordId: string;
   patientId: string;
@@ -400,6 +402,9 @@ export interface ReportDto {
   tenantId?: string;
   patientId?: string;
   requestedByUserId: string;
+  resultSummary?: string;
+  payload?: Record<string, unknown>;
+  failureReason?: string;
   fromTime?: string;
   toTime?: string;
   fileUrl?: string;

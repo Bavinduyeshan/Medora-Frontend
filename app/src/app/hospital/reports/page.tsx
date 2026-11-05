@@ -45,7 +45,7 @@ export default function HospitalReportsPage() {
         reportType: "TENANT_ACTIVITY",
         tenantId,
       });
-      toast.success("Report is being prepared.");
+      toast.success("Report request completed. Check its status below.");
     } catch (err) {
       toast.error(
         err instanceof ApiError ? err.message : "Could not prepare report.",
@@ -113,21 +113,47 @@ export default function HospitalReportsPage() {
                 </div>
                 <Badge tone={STATUS_TONE[r.status]}>{r.status}</Badge>
               </div>
-              {r.status === "COMPLETED" && r.fileUrl && (
-                <a
-                  href={r.fileUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-flex"
+              {r.resultSummary && (
+                <p className="mt-4 text-sm text-ink-600">{r.resultSummary}</p>
+              )}
+              {r.failureReason && (
+                <p
+                  role="alert"
+                  className="mt-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-700"
                 >
+                  {r.failureReason}
+                </p>
+              )}
+              {r.status === "COMPLETED" && r.payload && (
+                <div className="mt-4 space-y-3">
+                  <details>
+                    <summary className="cursor-pointer text-sm font-medium text-brand-700">
+                      View report data
+                    </summary>
+                    <pre className="mt-3 max-h-80 overflow-auto rounded-xl bg-ink-50 p-4 text-xs">
+                      {JSON.stringify(r.payload, null, 2)}
+                    </pre>
+                  </details>
                   <Button
                     size="sm"
                     variant="outline"
-                    icon={<Download className="h-3.5 w-3.5" />}
+                    icon={<Download className="h-4 w-4" />}
+                    onClick={() => {
+                      const url = URL.createObjectURL(
+                        new Blob([JSON.stringify(r, null, 2)], {
+                          type: "application/json",
+                        }),
+                      );
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `medora-report-${r.id}.json`;
+                      a.click();
+                      setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    }}
                   >
-                    Download
+                    Download report
                   </Button>
-                </a>
+                </div>
               )}
             </CardContent>
           </Card>
