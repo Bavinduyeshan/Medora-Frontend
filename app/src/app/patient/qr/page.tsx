@@ -1,27 +1,41 @@
-'use client';
+"use client";
 
-import { QRCodeSVG } from 'qrcode.react';
-import { RefreshCcw, ShieldCheck, History } from 'lucide-react';
-import { toast } from 'sonner';
-import { useCurrentPatient, usePatientQr, usePatientScanHistory, useRegenerateQr } from '@/hooks/usePatientData';
-import { Card, CardContent } from '@/components/ui/Card';
-import { PageHeader, EmptyState, Spinner, ErrorState } from '@/components/ui/Feedback';
-import { Button } from '@/components/ui/Button';
-import { formatDateTime } from '@/lib/utils';
-import { ApiError } from '@/lib/http';
+import { QRCodeSVG } from "qrcode.react";
+import { RefreshCcw, ShieldCheck, History } from "lucide-react";
+import { toast } from "sonner";
+import {
+  useCurrentPatient,
+  usePatientQr,
+  usePatientScanHistory,
+  useRegenerateQr,
+} from "@/hooks/usePatientData";
+import { Card, CardContent } from "@/components/ui/Card";
+import {
+  PageHeader,
+  EmptyState,
+  Spinner,
+  ErrorState,
+} from "@/components/ui/Feedback";
+import { Button } from "@/components/ui/Button";
+import { formatDateTime } from "@/lib/utils";
+import { ApiError } from "@/lib/http";
 
 export default function PatientQrPage() {
   const { data: patient } = useCurrentPatient();
   const { data: qr, isLoading, error, refetch } = usePatientQr(patient?.id);
-  const { data: history, isLoading: historyLoading } = usePatientScanHistory(patient?.id);
+  const { data: history, isLoading: historyLoading } = usePatientScanHistory(
+    patient?.id,
+  );
   const regenerate = useRegenerateQr(patient?.id);
 
   const onRegenerate = async () => {
     try {
       await regenerate.mutateAsync();
-      toast.success('QR code regenerated. Your old code is now invalid.');
+      toast.success("QR code regenerated. Your old code is now invalid.");
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Could not regenerate QR code.');
+      toast.error(
+        err instanceof ApiError ? err.message : "Could not regenerate QR code.",
+      );
     }
   };
 
@@ -41,17 +55,33 @@ export default function PatientQrPage() {
                 <Spinner />
               </div>
             )}
-            {error && <ErrorState message={(error as ApiError).message} onRetry={() => refetch()} />}
+            {error && (
+              <ErrorState
+                message={(error as ApiError).message}
+                onRetry={() => refetch()}
+              />
+            )}
             {qr && (
               <>
                 <div className="rounded-2xl border border-brand-100/70 bg-white p-5 shadow-[var(--shadow-card)]">
-                  <QRCodeSVG value={qr.qrToken} size={200} level="M" includeMargin />
+                  <QRCodeSVG
+                    value={qr.qrToken}
+                    size={200}
+                    level="M"
+                    includeMargin
+                  />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs font-bold uppercase tracking-wider text-ink-400">Token</p>
-                  <p className="break-all font-mono text-[11px] text-ink-600">{qr.qrToken}</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-ink-400">
+                    Token
+                  </p>
+                  <p className="break-all font-mono text-[12px] text-ink-600">
+                    {qr.qrToken}
+                  </p>
                 </div>
-                <p className="text-[11px] text-ink-400">Issued {formatDateTime(qr.issuedAt)}</p>
+                <p className="text-[12px] text-ink-400">
+                  Issued {formatDateTime(qr.issuedAt)}
+                </p>
                 <Button
                   variant="outline"
                   size="sm"
@@ -86,12 +116,21 @@ export default function PatientQrPage() {
             )}
             <div className="space-y-2.5">
               {history?.content.map((h) => (
-                <div key={h.id} className="flex items-center justify-between rounded-xl border border-ink-100 p-3.5">
+                <div
+                  key={h.id}
+                  className="flex items-center justify-between rounded-xl border border-ink-100 p-3.5"
+                >
                   <div>
-                    <p className="text-xs font-bold text-ink-800">{h.tenantName || h.tenantId}</p>
-                    <p className="text-[11px] text-ink-400">Purpose: {h.purpose}</p>
+                    <p className="text-xs font-bold text-ink-800">
+                      {h.tenantName || h.tenantId}
+                    </p>
+                    <p className="text-[12px] text-ink-400">
+                      Purpose: {h.purpose}
+                    </p>
                   </div>
-                  <span className="text-[11px] font-semibold text-ink-400">{formatDateTime(h.scannedAt)}</span>
+                  <span className="text-[12px] font-semibold text-ink-400">
+                    {formatDateTime(h.scannedAt)}
+                  </span>
                 </div>
               ))}
             </div>

@@ -1,29 +1,53 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { UserPlus, Search, CheckCircle2, XCircle, Building2 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { useAddAffiliation, useTenantAffiliations, useTenantDepartments, useUpdateAffiliationStatus } from '@/hooks/useHospitalData';
-import { doctorsApi } from '@/lib/api/doctors';
-import { PageHeader, EmptyState, Spinner, ErrorState } from '@/components/ui/Feedback';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
-import { Field, Input, Select } from '@/components/ui/Field';
-import { Card, CardContent } from '@/components/ui/Card';
-import { formatDate, fullName } from '@/lib/utils';
-import { ApiError } from '@/lib/http';
-import type { DoctorDto } from '@/types/api';
+import { useState } from "react";
+import { toast } from "sonner";
+import {
+  UserPlus,
+  Search,
+  CheckCircle2,
+  XCircle,
+  Building2,
+} from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import {
+  useAddAffiliation,
+  useTenantAffiliations,
+  useTenantDepartments,
+  useUpdateAffiliationStatus,
+} from "@/hooks/useHospitalData";
+import { doctorsApi } from "@/lib/api/doctors";
+import {
+  PageHeader,
+  EmptyState,
+  Spinner,
+  ErrorState,
+} from "@/components/ui/Feedback";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
+import { Field, Input, Select } from "@/components/ui/Field";
+import { Card, CardContent } from "@/components/ui/Card";
+import { formatDate, fullName } from "@/lib/utils";
+import { ApiError } from "@/lib/http";
+import type { DoctorDto } from "@/types/api";
 
-function AddAffiliationModal({ isOpen, onClose, tenantId }: { isOpen: boolean; onClose: () => void; tenantId: string }) {
-  const [query, setQuery] = useState('');
+function AddAffiliationModal({
+  isOpen,
+  onClose,
+  tenantId,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  tenantId: string;
+}) {
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<DoctorDto[]>([]);
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState<DoctorDto | null>(null);
-  const [roleAtTenant, setRoleAtTenant] = useState('Consultant');
+  const [roleAtTenant, setRoleAtTenant] = useState("Consultant");
   const { data: departments } = useTenantDepartments(tenantId);
-  const [departmentId, setDepartmentId] = useState('');
+  const [departmentId, setDepartmentId] = useState("");
   const addAffiliation = useAddAffiliation(tenantId);
 
   const onSearch = async () => {
@@ -33,7 +57,7 @@ function AddAffiliationModal({ isOpen, onClose, tenantId }: { isOpen: boolean; o
       const doctors = await doctorsApi.search(query.trim());
       setResults(doctors);
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Search failed.');
+      toast.error(err instanceof ApiError ? err.message : "Search failed.");
     } finally {
       setSearching(false);
     }
@@ -42,23 +66,46 @@ function AddAffiliationModal({ isOpen, onClose, tenantId }: { isOpen: boolean; o
   const onSubmit = async () => {
     if (!selected) return;
     try {
-      await addAffiliation.mutateAsync({ doctorId: selected.id, departmentId: departmentId || undefined, roleAtTenant });
-      toast.success(`${fullName(selected.firstName, selected.lastName)} added to your care team.`);
+      await addAffiliation.mutateAsync({
+        doctorId: selected.id,
+        departmentId: departmentId || undefined,
+        roleAtTenant,
+      });
+      toast.success(
+        `${fullName(selected.firstName, selected.lastName)} added to your care team.`,
+      );
       setSelected(null);
-      setQuery('');
+      setQuery("");
       setResults([]);
       onClose();
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Could not add doctor.');
+      toast.error(
+        err instanceof ApiError ? err.message : "Could not add doctor.",
+      );
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add doctor to care team" description="Search by name, specialty, or registration number.">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Add doctor to care team"
+      description="Search by name, specialty, or registration number."
+    >
       <div className="space-y-4">
         <div className="flex gap-2">
-          <Input placeholder="Search doctors…" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onSearch()} />
-          <Button variant="outline" icon={<Search className="h-4 w-4" />} loading={searching} onClick={onSearch}>
+          <Input
+            placeholder="Search doctors…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && onSearch()}
+          />
+          <Button
+            variant="outline"
+            icon={<Search className="h-4 w-4" />}
+            loading={searching}
+            onClick={onSearch}
+          >
             Search
           </Button>
         </div>
@@ -69,14 +116,22 @@ function AddAffiliationModal({ isOpen, onClose, tenantId }: { isOpen: boolean; o
               key={d.id}
               onClick={() => setSelected(d)}
               className={`flex w-full items-center justify-between rounded-xl border p-3 text-left transition-colors ${
-                selected?.id === d.id ? 'border-brand-500 bg-brand-50' : 'border-ink-100 hover:bg-brand-50/40'
+                selected?.id === d.id
+                  ? "border-brand-500 bg-brand-50"
+                  : "border-ink-100 hover:bg-brand-50/40"
               }`}
             >
               <div>
-                <p className="text-xs font-black text-ink-950">{fullName(d.firstName, d.lastName)}</p>
-                <p className="text-[11px] text-ink-500">{d.specialization} · Reg. {d.slmcNumber}</p>
+                <p className="text-xs font-semibold text-ink-950">
+                  {fullName(d.firstName, d.lastName)}
+                </p>
+                <p className="text-[12px] text-ink-500">
+                  {d.specialization} · Reg. {d.slmcNumber}
+                </p>
               </div>
-              {selected?.id === d.id && <CheckCircle2 className="h-4 w-4 text-brand-600" />}
+              {selected?.id === d.id && (
+                <CheckCircle2 className="h-4 w-4 text-brand-600" />
+              )}
             </button>
           ))}
         </div>
@@ -84,10 +139,17 @@ function AddAffiliationModal({ isOpen, onClose, tenantId }: { isOpen: boolean; o
         {selected && (
           <div className="space-y-3 rounded-xl bg-ink-50 p-3.5">
             <Field label="Role at facility">
-              <Input value={roleAtTenant} onChange={(e) => setRoleAtTenant(e.target.value)} placeholder="Consultant, Resident, etc." />
+              <Input
+                value={roleAtTenant}
+                onChange={(e) => setRoleAtTenant(e.target.value)}
+                placeholder="Consultant, Resident, etc."
+              />
             </Field>
             <Field label="Department" hint="Optional">
-              <Select value={departmentId} onChange={(e) => setDepartmentId(e.target.value)}>
+              <Select
+                value={departmentId}
+                onChange={(e) => setDepartmentId(e.target.value)}
+              >
                 <option value="">— Unassigned —</option>
                 {departments?.map((d) => (
                   <option key={d.id} value={d.id}>
@@ -96,7 +158,12 @@ function AddAffiliationModal({ isOpen, onClose, tenantId }: { isOpen: boolean; o
                 ))}
               </Select>
             </Field>
-            <Button className="w-full" loading={addAffiliation.isPending} onClick={onSubmit} icon={<UserPlus className="h-4 w-4" />}>
+            <Button
+              className="w-full"
+              loading={addAffiliation.isPending}
+              onClick={onSubmit}
+              icon={<UserPlus className="h-4 w-4" />}
+            >
               Add doctor
             </Button>
           </div>
@@ -109,16 +176,30 @@ function AddAffiliationModal({ isOpen, onClose, tenantId }: { isOpen: boolean; o
 export default function HospitalAffiliationsPage() {
   const { user } = useAuth();
   const tenantId = user?.tenantId ?? undefined;
-  const { data: affiliations, isLoading, error, refetch } = useTenantAffiliations(tenantId);
+  const {
+    data: affiliations,
+    isLoading,
+    error,
+    refetch,
+  } = useTenantAffiliations(tenantId);
   const updateStatus = useUpdateAffiliationStatus(tenantId);
   const [addOpen, setAddOpen] = useState(false);
 
-  const onToggleStatus = async (doctorId: string, status: 'ACTIVE' | 'INACTIVE') => {
+  const onToggleStatus = async (
+    doctorId: string,
+    status: "ACTIVE" | "INACTIVE",
+  ) => {
     try {
       await updateStatus.mutateAsync({ doctorId, status });
-      toast.success(`Doctor access ${status === 'ACTIVE' ? 'activated' : 'deactivated'}.`);
+      toast.success(
+        `Doctor access ${status === "ACTIVE" ? "activated" : "deactivated"}.`,
+      );
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Could not update doctor access.');
+      toast.error(
+        err instanceof ApiError
+          ? err.message
+          : "Could not update doctor access.",
+      );
     }
   };
 
@@ -129,7 +210,10 @@ export default function HospitalAffiliationsPage() {
         title="Care Team Doctors"
         description="Manage which doctors can work with patients at your facility."
         actions={
-          <Button icon={<UserPlus className="h-4 w-4" />} onClick={() => setAddOpen(true)}>
+          <Button
+            icon={<UserPlus className="h-4 w-4" />}
+            onClick={() => setAddOpen(true)}
+          >
             Add doctor
           </Button>
         }
@@ -140,31 +224,67 @@ export default function HospitalAffiliationsPage() {
           <Spinner />
         </div>
       )}
-      {error && <ErrorState message={(error as ApiError).message} onRetry={() => refetch()} />}
+      {error && (
+        <ErrorState
+          message={(error as ApiError).message}
+          onRetry={() => refetch()}
+        />
+      )}
       {!isLoading && !error && (!affiliations || affiliations.length === 0) && (
-        <EmptyState icon={Building2} title="No doctors added yet" description="Add doctors so they can support care at your facility." />
+        <EmptyState
+          icon={Building2}
+          title="No doctors added yet"
+          description="Add doctors so they can support care at your facility."
+        />
       )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         {affiliations?.map((a) => (
-          <Card key={a.id} className="border-brand-100/70 transition-all hover:-translate-y-0.5 hover:border-brand-200">
+          <Card
+            key={a.id}
+            className="border-brand-100/70 transition-all hover:shadow-sm hover:border-brand-200"
+          >
             <CardContent>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-black text-ink-950">{a.doctorName || a.doctorId}</p>
+                  <p className="text-sm font-semibold text-ink-950">
+                    {a.doctorName || a.doctorId}
+                  </p>
                   <p className="text-xs text-ink-500">{a.roleAtTenant}</p>
-                  <p className="mt-1 text-[11px] text-ink-400">Since {formatDate(a.createdAt)}</p>
+                  <p className="mt-1 text-[12px] text-ink-400">
+                    Since {formatDate(a.createdAt)}
+                  </p>
                 </div>
-                <Badge tone={a.status === 'ACTIVE' ? 'success' : a.status === 'PENDING' ? 'warning' : 'neutral'}>{a.status}</Badge>
+                <Badge
+                  tone={
+                    a.status === "ACTIVE"
+                      ? "success"
+                      : a.status === "PENDING"
+                        ? "warning"
+                        : "neutral"
+                  }
+                >
+                  {a.status}
+                </Badge>
               </div>
               <div className="mt-3 flex gap-2">
-                {a.status !== 'ACTIVE' && (
-                  <Button size="sm" variant="outline" icon={<CheckCircle2 className="h-3.5 w-3.5" />} onClick={() => onToggleStatus(a.doctorId, 'ACTIVE')}>
+                {a.status !== "ACTIVE" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    icon={<CheckCircle2 className="h-3.5 w-3.5" />}
+                    onClick={() => onToggleStatus(a.doctorId, "ACTIVE")}
+                  >
                     Activate
                   </Button>
                 )}
-                {a.status !== 'INACTIVE' && (
-                  <Button size="sm" variant="ghost" icon={<XCircle className="h-3.5 w-3.5" />} onClick={() => onToggleStatus(a.doctorId, 'INACTIVE')}>
+                {a.status !== "INACTIVE" && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon={<XCircle className="h-3.5 w-3.5" />}
+                    onClick={() => onToggleStatus(a.doctorId, "INACTIVE")}
+                  >
                     Deactivate
                   </Button>
                 )}
@@ -174,7 +294,13 @@ export default function HospitalAffiliationsPage() {
         ))}
       </div>
 
-      {tenantId && <AddAffiliationModal isOpen={addOpen} onClose={() => setAddOpen(false)} tenantId={tenantId} />}
+      {tenantId && (
+        <AddAffiliationModal
+          isOpen={addOpen}
+          onClose={() => setAddOpen(false)}
+          tenantId={tenantId}
+        />
+      )}
     </div>
   );
 }

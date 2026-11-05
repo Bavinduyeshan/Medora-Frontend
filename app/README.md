@@ -108,7 +108,7 @@ service.
 | Path | Role | Notes |
 |---|---|---|
 | `/` | public | Marketing landing page |
-| `/login`, `/register`, `/register-hospital` | public | Auth + tenant registration request |
+| `/login`, `/register`, `/register-hospital`, `/forgot-password`, `/reset-password?token=…` | public | Authentication, recovery + facility registration |
 | `/patient`, `/patient/records`, `/patient/records/[id]`, `/patient/prescriptions`, `/patient/appointments`, `/patient/qr` | PATIENT | |
 | `/doctor`, `/doctor/patients/[patientId]`, `/doctor/affiliations`, `/doctor/appointments` | DOCTOR | |
 | `/hospital`, `/hospital/affiliations`, `/hospital/departments`, `/hospital/reports` | HOSPITAL_ADMIN (+ RECEPTIONIST/LAB_TECHNICIAN read access) | |
@@ -125,3 +125,17 @@ service.
   a form — currently only display of existing lab reports is wired)
 - File/document upload for hospital license documents on the registration form (it
   currently accepts a URL to an already-hosted file, per the documented DTO shape)
+
+## Interface
+
+The public site, account screens, and all four portals share the Medora blue/slate
+palette, readable typography, consistent form controls, and responsive layouts.
+`src/components/layout/PortalShell.tsx` provides role-specific navigation, a working
+page finder (Cmd/Ctrl+K), notifications, and a keyboard-accessible mobile menu.
+Shared fields associate labels, hints, and errors with their controls; dialogs
+trap focus, close with Escape, and restore focus to their trigger.
+
+Password recovery uses the existing `authApi.forgotPassword` and
+`authApi.resetPassword` endpoints. Configure the backend recovery email to link to
+this frontend's `/reset-password?token=…` URL. Hospital SSO and QR sign-in are not
+shown as available sign-in methods because they have no frontend implementation.
